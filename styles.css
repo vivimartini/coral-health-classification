@@ -1,0 +1,99 @@
+/* General Reset */
+body, h1, h2, p, a {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+body {
+  line-height: 1.6;
+  background-color: #f4f4f4;
+}
+
+/* Banner Section */
+.banner {
+  background: url('images/hero-image.jpg') no-repeat center center/cover;
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+}
+
+.banner h1 {
+  font-size: 3rem;
+  color: white;
+}
+
+.banner p {
+  font-size: 1.5rem;
+  margin-top: 10px;
+  color: white;
+}
+
+.banner .button {
+  margin: 20px 10px 0;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.banner .button:hover {
+  background-color: #0056b3;
+}
+
+/* Navigation Bar */
+nav {
+  display: flex;
+  justify-content: center;
+  padding: 15px 0;
+  background-color: #ffffff;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+nav a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: #007bff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #0056b3;
+}
+
+/* Main Content */
+main {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+  background-color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+section {
+  margin-bottom: 40px;
+}
+
+section h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+section p {
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
