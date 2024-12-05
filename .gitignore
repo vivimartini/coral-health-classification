@@ -1,0 +1,12 @@
+# macOS system files
+.DS_Store
+
+# RStudio files
+.Rhistory
+
+# Node.js dependencies (if applicable)
+node_modules/
+
+# Python virtual environments (if applicable)
+__pycache__/
+*.pyc
