@@ -35,23 +35,23 @@
 
     <section id="introduction">
       <h2>Introduction</h2>
-      <p>Coral reefs are critical marine ecosystems that support biodiversity and act as natural coastal barriers. However, these ecosystems are under threat due to global warming, pollution, and human activities, leading to significant degradation. Monitoring coral health is essential for conservation and restoration efforts. Traditional monitoring techniques are time-consuming and labor-intensive, making automated solutions highly desirable. This project uses deep learning to classify coral health into three categories: Healthy, Damaged, and Bleached. A pre-trained ResNet50 model is fine-tuned for this task, leveraging transfer learning to maximize performance on limited data. Additionally, Gradient-weighted Class Activation Mapping (Grad-CAM) is employed to provide interpretability by highlighting the regions of the images most influential in the model’s decisions.</p>
+      <p>Coral reefs are essential to marine biodiversity, yet they are under increasing threat due to climate change, pollution, and human activities. Accurate monitoring of coral health is vital to conservation efforts, but manual methods can be labor-intensive and subjective. Deep learning offers a scalable and automated solution for coral classification, providing consistent and interpretable results. In this project, a pre-trained ResNet50 architecture was fine-tuned to classify coral health into three categories: bleached, healthy, and partially bleached. The model's performance was evaluated in two iterations—an initial baseline model and a second improved model. This report explores the technical reasoning behind key decisions, analyzes the results, and discusses the implications of this approach for coral reef conservation.</p>
     </section>
 
     <section id="data">
       <h2>Data</h2>
-      <p>The dataset, obtained from Roboflow, contains labeled images of corals across the three health categories. It is divided into training and validation sets to assess model performance. The images are preprocessed using transformations to improve generalization and robustness. For training, transformations include resizing to 224 \times 224, random horizontal flipping, color jittering, and normalization using ImageNet mean and standard deviation. Validation data undergoes resizing and normalization to ensure consistency during evaluation.</p>
+      <p>The dataset was acquired using the Roboflow API, containing images categorized into three health states: bleached, healthy, and partially bleached. An initial analysis of the class distribution revealed a significant imbalance, with the 'bleached' class overrepresented and the 'partially bleached' class underrepresented. This imbalance posed a clear challenge: models trained on such data are likely to perform poorly on underrepresented categories, as evidenced in the initial confusion matrix (Figure 3).</p>
       <figure class="image-caption">
-        <img src="images/class-distribution.png" alt="Distribution of classes in the dataset">
-        <figcaption>Distribution of classes in the dataset</figcaption>
+        <img src="images/class-distribution.png" alt="Training Class Distribution">
+        <figcaption>Figure 1. Distribution of classes in the dataset</figcaption>
       </figure>      
-      <p> The dataset exhibits class imbalance, with some coral health categories being underrepresented. To address this, augmentations such as brightness adjustments and random blurs were applied to the training data. A bar chart of class distribution visually confirmed the imbalance, emphasizing the need for these augmentations to ensure equitable learning across categories. The training set is further visualized to confirm the diversity and correctness of the data.</p>
+      <p> Figure 1. shows the distribution of training data across categories. The disparity in category frequencies explains the poor performance of the initial model on the 'partially bleached' class, as the model had fewer examples to learn distinguishing features for this category.</p>
       <figure class="image-caption">
-        <img src="images/coral-dataset.png" alt="Visualization of coral dataset">
-        <figcaption>Sample visualization of coral dataset.</figcaption>
+        <img src="images/coral-dataset.png" alt="Visualization of coral dataset sample">
+        <figcaption>Figure 2. Visualization of coral dataset sample</figcaption>
       </figure>
       <p>
-        The dataset was preprocessed using the following transformations to ensure compatibility with the ResNet50 model and improve generalization:
+        To prepare the images for the model, preprocessing steps included resizing all images to 224x224 pixels, which is the standard input size for ResNet50, followed by data augmentation techniques such as random horizontal flipping and color jittering. These augmentations aimed to improve the model's ability to generalize to new data by simulating variability in lighting and orientation. Finally, normalization was applied to align pixel intensity distributions with the ImageNet dataset on which ResNet50 was pre-trained.
       </p>
       <pre><code class="language-python">
         # Dataset Loading and Preprocessing
@@ -67,39 +67,60 @@
 
     <section id="modelling">
       <h2>Modelling</h2>
-      <p>This project utilizes the ResNet50 model, pre-trained on ImageNet, to benefit from transfer learning. The model’s final fully connected layer is replaced with a linear layer that outputs predictions for the three coral health classes. To prevent overfitting, a dropout layer with a 50% dropout rate is added before the fully connected layer.
-
-        The model is optimized using the AdamW optimizer, which incorporates weight decay to regularize the parameters. A cosine annealing scheduler dynamically adjusts the learning rate during training, facilitating smoother convergence. The loss function used is CrossEntropyLoss, appropriate for multi-class classification tasks.
-        
-        The training pipeline involves efficient batch processing using PyTorch DataLoaders. During each epoch, the model undergoes a forward pass to compute predictions, followed by loss calculation and backpropagation to update weights. The validation process evaluates model performance without updating parameters, calculating accuracy and tracking misclassifications. Grad-CAM is implemented during validation to interpret the model’s predictions by highlighting the image regions most influential in the decision-making process.</p>
+      <p>The baseline model used a pre-trained ResNet50 architecture, with its final fully connected layer replaced by a custom classifier tailored to the three coral health categories. The model was trained for 10 epochs using the Adam optimizer with an initial learning rate of 0.001. A StepLR scheduler reduced the learning rate by a factor of 0.1 after 5 epochs to facilitate convergence.</p>
+      <figure class="image-caption">
+        <img src="images/confusion-matrix-1.png" alt="Confusion Matrix - Initial Model">
+        <figcaption>Figure 3. Confusion Matrix - Initial Model</figcaption>
+      </figure> 
+      <p>While the training loss consistently decreased, indicating that the model was learning from the data, the validation loss plateaued early. This gap between training and validation performance suggested overfitting, where the model was overly reliant on the training data and unable to generalize effectively. The initial confusion matrix (Figure 2) confirms these shortcomings, with significant misclassifications in the 'partially bleached' category. The model frequently confused 'partially bleached' with 'bleached,' likely due to overlapping visual features such as pale or degraded coral tissue. In contrast, the 'healthy' category performed relatively well, as its vibrant colors and well-defined coral structures were easier for the model to distinguish.</p>    
+      <figure class="image-caption">
+        <img src="images/training-validation-loss-1.png" alt="Training and Validation Loss - Initial Model">
+        <figcaption>Figure 4. Training and Validation Loss - Initial Model</figcaption>
+      </figure> 
+      <p>To address the limitations of the baseline model, several refinements were introduced. A key enhancement was the incorporation of class weights into the loss function during fine-tuning. These weights, calculated as the inverse of class frequencies, prioritized learning from underrepresented categories such as 'partially bleached.' This adjustment directly addressed the imbalance in the dataset, ensuring the model did not disproportionately favor the dominant 'bleached' class.
+        Regularization techniques were also applied to improve generalization. A dropout layer with a rate of 50% was added to the fully connected layer, reducing the risk of overfitting by preventing the model from relying too heavily on specific neurons. Additionally, the optimizer was upgraded to AdamW, which incorporates weight decay to penalize large parameter values, further promoting generalization. The learning rate scheduler was replaced with OneCycleLR, which adjusts the learning rate dynamically throughout training, facilitating smoother convergence and reducing the risk of stagnation.</p>
+      <pre><code class="language-python">
+        # Adding Dropout Layer to Reduce Overfitting
+        # Replace the fully connected (fc) layer with a Sequential layer that includes Dropout
+        model.fc = nn.Sequential(
+          nn.Dropout(0.5),  # Dropout rate of 50% to randomly zero out neurons during training
+          nn.Linear(model.fc.in_features, num_classes)  # Fully connected layer for classification
+        )
+      </code></pre>
     </section>
 
     <section id="results">
       <h2>Results</h2>
-      <p>The initial performance of the model was evaluated to establish a baseline before implementing fine-tuning and hyperparameter optimization. This evaluation included an analysis of the confusion matrix, the training class distribution, and the training and validation loss curves over 10 epochs. These visualizations allowed me to assess the model’s ability to generalize and identify areas requiring improvement.</p>
-      <!-- Image -->
+      <p>These adjustments resulted in significant performance improvements, as evidenced by the updated confusion matrix (Figure 4). The model demonstrated better recall for the 'partially bleached' category, reducing confusion with 'bleached' and 'healthy.' This improvement underscores the effectiveness of weighted loss and fine-tuning techniques in addressing dataset imbalance.</p>
       <figure class="image-caption">
-        <img src="images/confusion-matrix-1.png" alt="Confusion matrix at epoch 10">
-        <figcaption>Confusion matrix at epoch 10</figcaption>
+        <img src="images/confusion-matrix-2.png" alt="Confusion matrix at epoch 10">
+        <figcaption>Figure 5. Confusion matrix at epoch 10</figcaption>
       </figure>
-      <p> The confusion matrix at epoch 10 showb provides detailed insights into the model’s classification performance across the three categories: Healthy, Damaged, and Bleached. The model performed well on the Damaged category, correctly classifying 28 samples with minimal errors. However, there were notable misclassifications in the Healthy and Bleached categories. Eight samples labeled as Healthy were misclassified as Bleached, and four Bleached samples were misclassified as either Healthy or Damaged. This pattern suggests the model struggled to distinguish between Healthy and Bleached corals, likely due to overlapping features in these categories or limitations in the dataset. Improving this aspect will be a key focus moving forward.
-      </p>
+      <p>The fine-tuned model exhibited smoother training and validation loss curves, as shown in Figure 6. Unlike the baseline model, the validation loss closely mirrored the training loss, indicating improved generalization. The integration of class weights ensured that the model paid more attention to underrepresented categories, leading to balanced performance across all classes.</p>
       <figure class="image-caption">
-        <img src="images/training-validation-loss.png" alt="Training and validation loss curves">
-        <figcaption>Training and validation loss curves</figcaption>
+        <img src="images/training-validation-loss-2.png" alt="Training and validation loss curves">
+        <figcaption>Figure 6. Training and validation loss curves</figcaption>
       </figure>
-      <p>The training and validation loss curves, depicted above, show the model’s learning progression over 10 epochs. The training loss decreased steadily throughout, indicating that the model was learning effectively from the training data. However, the validation loss initially dropped but began to plateau around epoch 4 and slightly increased toward epoch 9. This divergence between training and validation loss suggests the onset of overfitting, where the model performs well on the training set but struggles to generalize to unseen validation data. Addressing this issue will involve regularization techniques such as dropout or L2 regularization, as well as tuning the learning rate and other hyperparameters.
+      <p>The training and validation loss curves, depicted above, show the model’s learning progression over 10 epochs. The training loss decreased steadily throughout, indicating that the model was learning effectively from the training data. However, the validation loss initially dropped but began to plateau around epoch 4 and slightly increased toward epoch 9. This divergence between training and validation loss suggests the onset of overfitting, where the model performs well on the training set but struggles to generalize to unseen validation data.
       </p>
     </section>
 
     <section id="discussion">
-      <h2>Discussion</h2>
-      <p>From Figure X, one can see that... [interpretation of Figure X].</p>
+      <h2>Grad-CAM</h2>
+      <p>Grad-CAM (Gradient-weighted Class Activation Mapping) was employed to visualize the areas of the input images that influenced the model’s predictions. These heatmaps (Figure 6) provide insights into the decision-making process, revealing that the model consistently focused on coral regions rather than background noise. However, misclassifications highlighted by Grad-CAM suggest that mixed health states, where a coral exhibits features of both 'healthy' and 'partially bleached,' remain a challenge for the model.</p>
+      <figure class="image-caption">
+        <img src="images/Grad-CAM.png" alt="Grad-CAM Visualizations">
+        <figcaption>Figure 7. Grad-CAM Visualizationss</figcaption>
+      </figure>
     </section>
 
     <section id="conclusion">
       <h2>Conclusion</h2>
-      <p>Here is a brief summary. From this work, the following conclusions can be made:</p>
+      <p>This project demonstrates the potential of deep learning for automated coral health classification, addressing key challenges such as class imbalance and overfitting. The baseline model highlighted the limitations of training on imbalanced datasets, with poor performance on underrepresented categories such as 'partially bleached.' By incorporating class weights, dropout regularization, and advanced optimization techniques, the fine-tuned model achieved substantial improvements, as reflected in the confusion matrix and loss curves.
+
+        Grad-CAM visualizations provided valuable insights into the model's behavior, confirming that it learned to focus on relevant features while also identifying areas for further refinement. These findings underscore the importance of interpretability in deep learning, particularly for ecological applications where accuracy and transparency are critical.
+        
+        Future directions include expanding the dataset to cover a wider range of coral reef environments and integrating the model into a real-time monitoring system. Such advancements will enhance the ability of conservationists to monitor and protect these vital ecosystems.</p>
     </section>
   </main>
   <!-- Footer -->
