@@ -5,50 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coral Health Classification</title>
   <link rel="stylesheet" href="styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
 </head>
 <body>
   <!-- Banner Section -->
   <header class="banner">
     <div class="banner-content">
       <h1>Final Project: Coral Health Classification</h1>
-      <p>Using Deep Learning to Monitor and Protect Coral Reefs</p>
-      <div class="download-buttons">
-        <a href="path-to-zip.zip" class="button">Download .zip</a>
-      </div>
+      <p>Machine Learning for Coral Health Assessment Using Image Classification</p>
+      </div>3
     </div>
   </header>
 
-  <!-- Navigation Bar -->
-  <nav>
-    <a href="#project">My Project</a>
-    <a href="#introduction">Introduction</a>
-    <a href="#data">Data</a>
-    <a href="#modelling">Modelling</a>
-    <a href="#results">Results</a>
-    <a href="#discussion">Discussion</a>
-    <a href="#conclusion">Conclusion</a>
-  </nav>
+<!-- Navigation Bar -->
+<nav>
+  <a href="#introduction">Introduction</a>
+  <a href="#data">Data</a>
+  <a href="#modelling">Modelling</a>
+  <a href="#results">Results</a>
+  <a href="#discussion">Discussion</a>
+  <a href="#conclusion">Conclusion</a>
+  <a href="https://github.com/vivimartini/coral-health-classification">Github</a>
+</nav>  
 
   <!-- Main Content -->
   <main>
-    <section id="project">
-      <h2>My Project</h2>
-      <p>I applied machine learning techniques to investigate coral health. Below is my report.</p>
-    </section>
 
     <section id="introduction">
       <h2>Introduction</h2>
-      <p>Here is a summary description of the topic. Here is the problem. This is why the problem is important.</p>
+      <p>Coral reefs are critical marine ecosystems that support biodiversity and act as natural coastal barriers. However, these ecosystems are under threat due to global warming, pollution, and human activities, leading to significant degradation. Monitoring coral health is essential for conservation and restoration efforts. Traditional monitoring techniques are time-consuming and labor-intensive, making automated solutions highly desirable. This project uses deep learning to classify coral health into three categories: Healthy, Damaged, and Bleached. A pre-trained ResNet50 model is fine-tuned for this task, leveraging transfer learning to maximize performance on limited data. Additionally, Gradient-weighted Class Activation Mapping (Grad-CAM) is employed to provide interpretability by highlighting the regions of the images most influential in the model’s decisions.</p>
     </section>
 
     <section id="data">
       <h2>Data</h2>
-      <p>Here is an overview of the dataset, how it was obtained and the preprocessing steps taken, with some plots!</p>
+      <p>The dataset, obtained from Roboflow, contains labeled images of corals across the three health categories. It is divided into training and validation sets to assess model performance. The images are preprocessed using transformations to improve generalization and robustness. For training, transformations include resizing to 224 \times 224, random horizontal flipping, color jittering, and normalization using ImageNet mean and standard deviation. Validation data undergoes resizing and normalization to ensure consistency during evaluation.
+
+        The dataset exhibits class imbalance, with some coral health categories being underrepresented. To address this, augmentations such as brightness adjustments and random blurs were applied to the training data. A bar chart of class distribution visually confirmed the imbalance, emphasizing the need for these augmentations to ensure equitable learning across categories. The training set is further visualized to confirm the diversity and correctness of the data.</p>
+      <!-- Image -->
+      <figure class="image-caption">
+        <img src="images/coral-dataset.png" alt="Visualization of coral dataset">
+        <figcaption>Sample visualization of coral dataset.</figcaption>
+      </figure>
+      <p>
+        The dataset was preprocessed using the following transformations to ensure compatibility with the ResNet50 model and improve generalization:
+      </p>
+      <pre><code class="language-python">
+        # Dataset Loading and Preprocessing
+        transform_train = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.RandomHorizontalFlip(),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+        </code></pre>
     </section>
 
     <section id="modelling">
       <h2>Modelling</h2>
-      <p>Here are some more details about the machine learning approach, and why this was deemed appropriate for the dataset.</p>
+      <p>This project utilizes the ResNet50 model, pre-trained on ImageNet, to benefit from transfer learning. The model’s final fully connected layer is replaced with a linear layer that outputs predictions for the three coral health classes. To prevent overfitting, a dropout layer with a 50% dropout rate is added before the fully connected layer.
+
+        The model is optimized using the AdamW optimizer, which incorporates weight decay to regularize the parameters. A cosine annealing scheduler dynamically adjusts the learning rate during training, facilitating smoother convergence. The loss function used is CrossEntropyLoss, appropriate for multi-class classification tasks.
+        
+        The training pipeline involves efficient batch processing using PyTorch DataLoaders. During each epoch, the model undergoes a forward pass to compute predictions, followed by loss calculation and backpropagation to update weights. The validation process evaluates model performance without updating parameters, calculating accuracy and tracking misclassifications. Grad-CAM is implemented during validation to interpret the model’s predictions by highlighting the image regions most influential in the decision-making process.</p>
     </section>
 
     <section id="results">
@@ -66,5 +87,13 @@
       <p>Here is a brief summary. From this work, the following conclusions can be made:</p>
     </section>
   </main>
+  <!-- Footer -->
+  <footer class="page-footer">
+    <p>Vivika Martini</p>
+    <p>Department of Atmospheric and Oceanic Sciences, UCLA</p>
+    <p>AOS C111: Introduction to Machine Learning for the Physical Sciences</p>
+    <p>Dr. Alexander Lozinski</p>
+    <p>December 6, 2024</p>
+  </footer>
 </body>
 </html>

@@ -8,7 +8,7 @@ body, h1, h2, p, a {
 
 body {
   line-height: 1.6;
-  background-color: #f4f4f4;
+  background-color: #df1616;
 }
 
 /* Banner Section */
@@ -19,7 +19,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: rgb(233, 45, 45);
   text-align: center;
 }
 
@@ -79,9 +79,9 @@ main {
   padding: 20px;
   max-width: 900px;
   margin: auto;
-  background-color: #ffffff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  background-color: #ffffff; /* Keep the section white */
+  border-radius: 0; /* Remove rounded corners if you don't want them */
+  box-shadow: none; /* Remove shadow */
 }
 
 section {
@@ -97,3 +97,4 @@ section p {
   font-size: 1rem;
   margin-bottom: 15px;
 }
+

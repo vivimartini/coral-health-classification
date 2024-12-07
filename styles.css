@@ -1,0 +1,140 @@
+/* General Reset */
+body, h1, h2, p, a {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  color: #636363;
+}
+
+body {
+  line-height: 1.8;
+  background-color: #ffffff;
+}
+
+/* Banner Section */
+.banner {
+  background: url('images/hero-image.jpg') no-repeat center center/cover;
+  height: 60vh; /* Ensure a proper height for the banner */
+  position: relative; /* This makes the .banner the positioning context for child elements */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centers content vertically */
+  align-items: center;
+  text-align: center;
+}
+
+.banner h1 {
+  font-size: 3rem;
+  color: white;
+}
+
+.banner p {
+  font-size: 1.3rem;
+  margin-top: 10px;
+  color: white;
+}
+
+/* Navigation Bar */
+nav {
+  display: flex; /* Ensures the links are aligned horizontally */
+  justify-content: center; /* Centers the links */
+  align-items: center; /* Aligns items vertically */
+  gap: 30px; 
+  width: 100%; /* Full-width navigation bar */
+  background-color: #8db2c7; 
+  padding: 10px 0; /* Adds vertical spacing for better appearance */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  position: relative; /* Positioned under the header */
+  z-index: 10; /* Ensure it sits above the content */
+  border-bottom: 1px solid #ddd; /* Optional: adds a bottom border for a clean break */
+}
+
+nav a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #c9ced3;
+}
+
+/* Main Content */
+main {
+  padding: 30px;
+  max-width: 800px;
+  margin: auto;
+  background-color: #ffffff;
+  box-shadow:none;
+  border-radius: 0px;
+}
+
+section {
+  margin-bottom: 40px;
+}
+
+section h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+section p {
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+}
+
+.page-footer {
+  text-align: center; /* Center the text */
+  margin-top: 50px; /* Add spacing above the footer */
+  padding: 20px 10px; /* Add padding for space around the text */
+  font-size: 0.8rem; /* Smaller font size */
+  color: rgba(169, 162, 162, 0.2); /* Light grey color */
+  font-family: 'Open Sans', sans-serif; /* Consistent font styling */
+}
+
+/* Styling for the Image */
+.data-image {
+  max-width: 100%; /* Ensures image is responsive */
+  height: auto; /* Maintains aspect ratio */
+  margin: 20px 0; /* Adds spacing around the image */
+  border-radius: 5px; /* Optional: Rounded corners */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Adds a soft shadow */
+}
+
+/* Styling for Code Snippets */
+pre {
+  background-color: #f4f4f4; /* Light grey background for code blocks */
+  padding: 10px; /* Add padding for spacing */
+  border: 1px solid #ddd; /* Subtle border for separation */
+  border-radius: 5px; /* Rounded corners for modern look */
+  overflow-x: auto; /* Allow horizontal scrolling for long lines */
+  margin-top: 5px; /* Spacing between the text and the code block */
+}
+
+code {
+  font-family: 'Courier New', Courier, monospace; /* Monospace font for code */
+  font-size: 1rem; /* Consistent font size */
+  color: #333; /* Neutral text color */
+}
+
+.image-caption {
+  display: inline-block; /* Ensures the figure content is sized to the image */
+  text-align: center; /* Center the caption below the image */
+  margin: 20px auto; /* Optional: Adds spacing around the figure */
+}
+
+.image-caption img {
+  max-width: 100%; /* Ensures the image is responsive */
+  height: auto; /* Maintains the image's aspect ratio */
+  border-radius: 5px; /* Optional: Adds rounded corners to the image */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Adds a shadow for depth */
+}
+
+.image-caption figcaption {
+  font-size: 0.85rem; /* Makes the caption small */
+  color: #555; /* A muted color for the caption text */
+  margin-top: 8px; /* Adds space between the image and the caption */
+}
