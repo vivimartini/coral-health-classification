@@ -8,6 +8,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
   <!-- Banner Section -->
@@ -72,7 +73,7 @@
         <img src="images/confusion-matrix-1.png" alt="Confusion Matrix - Initial Model">
         <figcaption>Figure 3. Confusion Matrix - Initial Model</figcaption>
       </figure> 
-      <p>While the training loss consistently decreased, indicating that the model was learning from the data, the validation loss plateaued early. This gap between training and validation performance suggested overfitting, where the model was overly reliant on the training data and unable to generalize effectively. The initial confusion matrix (Figure 2) confirms these shortcomings, with significant misclassifications in the 'partially bleached' category. The model frequently confused 'partially bleached' with 'bleached,' likely due to overlapping visual features such as pale or degraded coral tissue. In contrast, the 'healthy' category performed relatively well, as its vibrant colors and well-defined coral structures were easier for the model to distinguish.</p>    
+      <p>While the training loss consistently decreased, indicating that the model was learning from the data, the validation loss plateaued early. This gap between training and validation performance suggested overfitting, where the model was overly reliant on the training data and unable to generalize effectively. The initial confusion matrix confirms these shortcomings, with significant misclassifications in the 'partially bleached' category. The model frequently confused 'partially bleached' with 'bleached,' likely due to overlapping visual features such as pale or degraded coral tissue. In contrast, the 'healthy' category performed relatively well, as its vibrant colors and well-defined coral structures were easier for the model to distinguish.</p>    
       <figure class="image-caption">
         <img src="images/training-validation-loss-1.png" alt="Training and Validation Loss - Initial Model">
         <figcaption>Figure 4. Training and Validation Loss - Initial Model</figcaption>
@@ -91,7 +92,7 @@
 
     <section id="results">
       <h2>Results</h2>
-      <p>These adjustments resulted in significant performance improvements, as evidenced by the updated confusion matrix (Figure 4). The model demonstrated better recall for the 'partially bleached' category, reducing confusion with 'bleached' and 'healthy.' This improvement underscores the effectiveness of weighted loss and fine-tuning techniques in addressing dataset imbalance.</p>
+      <p>These adjustments resulted in significant performance improvements, as evidenced by the updated confusion matrix (Figure 5). The model demonstrated better recall for the 'partially bleached' category, reducing confusion with 'bleached' and 'healthy.' This improvement underscores the effectiveness of weighted loss and fine-tuning techniques in addressing dataset imbalance.</p>
       <figure class="image-caption">
         <img src="images/confusion-matrix-2.png" alt="Confusion matrix at epoch 10">
         <figcaption>Figure 5. Confusion matrix at epoch 10</figcaption>
@@ -107,7 +108,7 @@
 
     <section id="discussion">
       <h2>Grad-CAM</h2>
-      <p>Grad-CAM (Gradient-weighted Class Activation Mapping) was employed to visualize the areas of the input images that influenced the model’s predictions. These heatmaps (Figure 6) provide insights into the decision-making process, revealing that the model consistently focused on coral regions rather than background noise. However, misclassifications highlighted by Grad-CAM suggest that mixed health states, where a coral exhibits features of both 'healthy' and 'partially bleached,' remain a challenge for the model.</p>
+      <p>Grad-CAM (Gradient-weighted Class Activation Mapping) was employed to visualize the areas of the input images that influenced the model’s predictions. These heatmaps (Figure 7) provide insights into the decision-making process, revealing that the model consistently focused on coral regions rather than background noise. However, misclassifications highlighted by Grad-CAM suggest that mixed health states, where a coral exhibits features of both 'healthy' and 'partially bleached,' remain a challenge for the model.</p>
       <figure class="image-caption">
         <img src="images/Grad-CAM.png" alt="Grad-CAM Visualizations">
         <figcaption>Figure 7. Grad-CAM Visualizationss</figcaption>
@@ -122,6 +123,23 @@
         
         Future directions include expanding the dataset to cover a wider range of coral reef environments and integrating the model into a real-time monitoring system. Such advancements will enhance the ability of conservationists to monitor and protect these vital ecosystems.</p>
     </section>
+      <!-- References Section -->
+    <section id="references">
+      <h2>References</h2>
+      <ol>
+        <li>
+          K. He, X. Zhang, S. Ren, and J. Sun, "Deep residual learning for image recognition," in 
+          <i>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</i>, 
+          2016, pp. 770–778. Available: 
+          <a href="https://arxiv.org/abs/1512.03385" target="_blank">https://arxiv.org/abs/1512.03385</a>.
+        </li>
+        <li>
+          R. R. Selvaraju, "Grad-CAM library documentation," 2024. Available: 
+          <a href="https://github.com/jacobgil/pytorch-grad-cam" target="_blank">https://github.com/jacobgil/pytorch-grad-cam</a>.
+        </li>
+      </ol>
+    </section>
+
   </main>
   <!-- Footer -->
   <footer class="page-footer">

@@ -59,7 +59,7 @@ nav a {
 }
 
 nav a:hover {
-  color: #636363;
+  color: #e1eeed;
 }
 
 /* Main Content */
@@ -88,8 +88,8 @@ section p {
 
 .page-footer {
   text-align: center; /* Center the text */
-  margin-top: 50px; /* Add spacing above the footer */
-  padding: 20px 10px; /* Add padding for space around the text */
+  margin-top: 10px; /* Add spacing above the footer */
+  padding: 20px 20px; /* Add padding for space around the text */
   font-size: 0.8rem; /* Smaller font size */
   color: rgba(169, 162, 162, 0.2); /* Light grey color */
   font-family: 'Open Sans', sans-serif; /* Consistent font styling */
@@ -133,3 +133,9 @@ code {
   color: #555; /* A muted color for the caption text */
   margin-top: 8px; /* Adds space between the image and the caption */
 }
+
+.bold {
+  font-weight: bold; /* Makes the text bold */
+  color: #333; /* Optional: Define a consistent color */
+}
+

@@ -146,8 +146,7 @@ scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
 # Training loop
 train_losses, val_losses, val_accuracies = [], [], []
 
-# Class names (replace with your actual class names)
-class_names = ['Healthy', 'Damaged', 'Bleached']  # Example class names
+class_names = ['bleached', 'healthy', 'partially']
 
 # Number of epochs
 num_epochs = 10
@@ -238,19 +237,23 @@ plt.show()
 
 """# Improving the model"""
 
-from albumentations import Compose, HorizontalFlip, RandomBrightnessContrast, GaussianBlur, CLAHE
-from albumentations.pytorch import ToTensorV2
+from collections import Counter
+import torch
 
-# Replace transform_train with Albumentations pipeline
-transform_train = Compose([
-    HorizontalFlip(p=0.5),
-    RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.5),
-    GaussianBlur(blur_limit=(3, 7), p=0.3),
-    CLAHE(clip_limit=2.0, p=0.3),
-    ToTensorV2()
-])
+# Define the device (CPU or GPU)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-train_dataset = datasets.ImageFolder(os.path.join(dataset_path, "train"), transform=transform_train)
+# Calculate class counts
+class_counts = Counter([label for _, label in train_dataset])
+total_samples = sum(class_counts.values())
+
+# Compute class weights (inverse frequency)
+class_weights = {class_id: total_samples / count for class_id, count in class_counts.items()}
+class_weights_tensor = torch.tensor([class_weights[i] for i in range(len(class_counts))]).to(device)
+
+print("Class Weights:", class_weights_tensor)
+
+criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
 
 # Add Dropout to the fully connected layer
 model.fc = nn.Sequential(
@@ -258,25 +261,35 @@ model.fc = nn.Sequential(
     nn.Linear(model.fc.in_features, num_classes)
 )
 
-# Use AdamW optimizer with weight decay
+!pip uninstall torch torchvision torchaudio
+!pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+import torch.optim as optim
+from torch.optim.lr_scheduler import OneCycleLR
+
+# Optimizer
 optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
 
-# Replace scheduler with Cosine Annealing
-scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=1e-6)
+# Scheduler
+scheduler = OneCycleLR(
+    optimizer,
+    max_lr=0.01,  # Adjust based on your dataset and model size
+    steps_per_epoch=len(train_loader),
+    epochs=10,  # Number of epochs
+    anneal_strategy="cos",  # Cosine annealing for smoother adjustment
+    final_div_factor=10  # Final learning rate is max_lr / 10
+)
 
 # Training loop
 train_losses, val_losses, val_accuracies = [], [], []
+num_epochs = 10  # Number of epochs
 
-# Class names (replace with your actual class names)
-class_names = ['Healthy', 'Damaged', 'Bleached']  # Example class names
+class_names = ['bleached', 'healthy', 'partially']
 
-# Number of epochs
-num_epochs = 10
-
-for epoch in range(num_epochs):  # Training for 10 epochs
+for epoch in range(num_epochs):
     print(f"\nEpoch {epoch+1}/{num_epochs}")
 
-    # Training phase
+    # Training loop
     model.train()
     running_loss = 0.0
     train_loader_progress = tqdm(train_loader, desc=f"Training", leave=True)
@@ -290,7 +303,7 @@ for epoch in range(num_epochs):  # Training for 10 epochs
         optimizer.step()
         running_loss += loss.item()
 
-        # Update progress bar with current loss
+        # Update progress bar with current batch loss
         train_loader_progress.set_postfix({"Batch Loss": loss.item()})
 
     train_loader_progress.close()
@@ -324,7 +337,7 @@ for epoch in range(num_epochs):  # Training for 10 epochs
     val_accuracies.append(correct / total)
     scheduler.step()
 
-    # Print summary for the epoch
+    # Print epoch summary
     print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {train_losses[-1]:.4f}, "
           f"Val Loss: {val_losses[-1]:.4f}, Val Accuracy: {val_accuracies[-1]:.4f}")
 
@@ -361,49 +374,43 @@ plt.show()
 
 !pip install grad-cam
 
+# Get a single batch from the validation DataLoader
+inputs, labels = next(iter(val_loader))  # Fetch a batch from validation set
+
+# Select a single image from the batch
+input_tensor = inputs[0].unsqueeze(0)  # Add batch dimension
+
+# Move the tensor to the correct device
+input_tensor = input_tensor.to(device)  # Move to GPU/CPU
+
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 import matplotlib.pyplot as plt
 
-# Initialize Grad-CAM with the desired target layer
-target_layer = model.layer4[-1]  # Last convolutional block of ResNet50
-cam = GradCAM(model=model, target_layers=[target_layer], use_cuda=torch.cuda.is_available())
+# Define the target layer
+target_layer = model.layer4[-1]
 
-from torchvision.transforms.functional import to_pil_image
+# Initialize Grad-CAM
+cam = GradCAM(model=model, target_layers=[target_layer])
 
-def visualize_gradcam(input_tensor, label, model, target_layer, class_names):
-    """
-    Generate and visualize Grad-CAM heatmap for a given input.
+# Get a single input tensor from the validation DataLoader
+inputs, labels = next(iter(val_loader))  # Fetch a batch from validation set
+input_tensor = inputs[0].unsqueeze(0).to(device)  # Select a single image and move to the correct device
 
-    Args:
-        input_tensor: Single input image tensor (1 x C x H x W).
-        label: Ground truth label of the input image.
-        model: Trained PyTorch model.
-        target_layer: Layer to target for Grad-CAM.
-        class_names: List of class names.
+# Generate the Grad-CAM heatmap
+grayscale_cam = cam(input_tensor=input_tensor)[0]  # Generate Grad-CAM for the first image
 
-    Returns:
-        None
-    """
-    # Initialize Grad-CAM
-    cam = GradCAM(model=model, target_layers=[target_layer], use_cuda=torch.cuda.is_available())
+# Convert the input tensor back to an image for visualization
+input_image = input_tensor[0].permute(1, 2, 0).cpu().numpy()  # Convert to HWC format
+input_image = (input_image - input_image.min()) / (input_image.max() - input_image.min())  # Normalize
 
-    # Generate Grad-CAM heatmap
-    grayscale_cam = cam(input_tensor=input_tensor)[0]
+# Overlay Grad-CAM heatmap on the input image
+visualization = show_cam_on_image(input_image, grayscale_cam, use_rgb=True)
 
-    # Convert tensor to image
-    image = input_tensor[0].permute(1, 2, 0).cpu().numpy()  # Convert to HWC format
-    image = (image - image.min()) / (image.max() - image.min())  # Normalize to [0, 1]
-
-    # Overlay Grad-CAM on the image
-    visualization = show_cam_on_image(image, grayscale_cam, use_rgb=True)
-
-    # Display the result
-    plt.figure(figsize=(6, 6))
-    plt.imshow(visualization)
-    plt.title(f"Grad-CAM Visualization\nLabel: {class_names[label]}")
-    plt.axis("off")
-    plt.show()
+# Display the result
+plt.imshow(visualization)
+plt.axis('off')
+plt.show()
 
 model.eval()
 misclassified = []
@@ -421,28 +428,102 @@ with torch.no_grad():
 
 print(f"Total misclassified examples: {len(misclassified)}")
 
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
+import matplotlib.pyplot as plt
+
+def visualize_gradcam(input_tensor, true_label, pred_label, model, target_layer, class_names):
+    """
+    Generate and visualize Grad-CAM heatmap for a given input.
+
+    Args:
+        input_tensor: Single input image tensor (1 x C x H x W).
+        true_label: Ground truth label of the input image.
+        pred_label: Predicted label of the input image.
+        model: Trained PyTorch model.
+        target_layer: Layer to target for Grad-CAM.
+        class_names: List of class names.
+
+    Returns:
+        None
+    """
+    # Initialize Grad-CAM
+    cam = GradCAM(model=model, target_layers=[target_layer])
+
+    # Generate Grad-CAM heatmap
+    grayscale_cam = cam(input_tensor=input_tensor)[0]
+
+    # Convert tensor to image
+    image = input_tensor[0].permute(1, 2, 0).cpu().numpy()  # Convert to HWC format
+    image = (image - image.min()) / (image.max() - image.min())  # Normalize to [0, 1]
+
+    # Overlay Grad-CAM on the image
+    visualization = show_cam_on_image(image, grayscale_cam, use_rgb=True)
+
+    # Display the result
+    plt.figure(figsize=(6, 6))
+    plt.imshow(visualization)
+    plt.title(f"Grad-CAM Visualization\nTrue: {class_names[true_label]}, Predicted: {class_names[pred_label]}")
+    plt.axis("off")
+    plt.show()
+
+target_layer = model.layer4[-1]  # Last convolutional block of ResNet50
+
 # Visualize Grad-CAM for the first 5 misclassified examples
 for img, true_label, pred_label in misclassified[:5]:
-    input_tensor = img.unsqueeze(0)  # Add batch dimension
+    input_tensor = img.unsqueeze(0).to(device)  # Add batch dimension and move to the correct device
     print(f"True Label: {class_names[true_label.item()]}, Predicted: {class_names[pred_label.item()]}")
-    visualize_gradcam(input_tensor, true_label.item(), model, target_layer, class_names)
+    visualize_gradcam(input_tensor, true_label.item(), pred_label.item(), model, target_layer, class_names)
 
-correctly_classified = []
+def display_gradcam_grid(misclassified, model, target_layer, class_names, num_images=6):
+    """
+    Display Grad-CAM visualizations for multiple misclassified examples in a grid.
 
-with torch.no_grad():
-    for inputs, labels in val_loader:
-        inputs, labels = inputs.to(device), labels.to(device)
-        outputs = model(inputs)
-        _, preds = torch.max(outputs, 1)
+    Args:
+        misclassified: List of misclassified examples (image, true_label, pred_label).
+        model: Trained PyTorch model.
+        target_layer: Target layer for Grad-CAM.
+        class_names: List of class names.
+        num_images: Number of images to display in the grid.
+    """
+    # Limit the number of images to display
+    num_images = min(num_images, len(misclassified))
 
-        # Collect correctly classified examples
-        for i in range(len(preds)):
-            if preds[i] == labels[i]:  # Check for correct classification
-                correctly_classified.append((inputs[i], labels[i]))
+    # Initialize Grad-CAM
+    cam = GradCAM(model=model, target_layers=[target_layer])
 
-# Visualize Grad-CAM for the first 5 correctly classified examples
-print(f"Total correctly classified examples: {len(correctly_classified)}")
+    # Set up the grid for plotting
+    cols = 3  # Number of columns in the grid
+    rows = (num_images + cols - 1) // cols  # Calculate number of rows needed
+    fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
+    axes = axes.flatten()  # Flatten to easily iterate over axes
 
-for img, label in correctly_classified[:5]:
-    input_tensor = img.unsqueeze(0)  # Add batch dimension
-    visualize_gradcam(input_tensor, label.item(), model, target_layer, class_names)
+    for i, (img, true_label, pred_label) in enumerate(misclassified[:num_images]):
+        input_tensor = img.unsqueeze(0).to(device)  # Add batch dimension and move to the correct device
+
+        # Generate Grad-CAM heatmap
+        grayscale_cam = cam(input_tensor=input_tensor)[0]
+
+        # Convert tensor to image
+        image = input_tensor[0].permute(1, 2, 0).cpu().numpy()  # Convert to HWC format
+        image = (image - image.min()) / (image.max() - image.min())  # Normalize to [0, 1]
+
+        # Overlay Grad-CAM on the image
+        visualization = show_cam_on_image(image, grayscale_cam, use_rgb=True)
+
+        # Plot the result
+        axes[i].imshow(visualization)
+        axes[i].set_title(
+            f"True: {class_names[true_label.item()]}\nPredicted: {class_names[pred_label.item()]}"
+        )
+        axes[i].axis("off")
+
+    # Hide any unused subplots
+    for j in range(num_images, len(axes)):
+        axes[j].axis("off")
+
+    plt.tight_layout()
+    plt.show()
+
+# Call the function to display a grid of misclassified examples
+display_gradcam_grid(misclassified, model, target_layer, class_names, num_images=6)
