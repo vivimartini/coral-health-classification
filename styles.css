@@ -95,14 +95,6 @@ section p {
   font-family: 'Open Sans', sans-serif; /* Consistent font styling */
 }
 
-/* Styling for the Image */
-.data-image {
-  max-width: 100%; /* Ensures image is responsive */
-  height: auto; /* Maintains aspect ratio */
-  margin: 20px 0; /* Adds spacing around the image */
-  border-radius: 5px; /* Optional: Rounded corners */
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Adds a soft shadow */
-}
 
 /* Styling for Code Snippets */
 pre {
@@ -121,16 +113,19 @@ code {
 }
 
 .image-caption {
-  display: inline-block; /* Ensures the figure content is sized to the image */
-  text-align: center; /* Center the caption below the image */
-  margin: 20px auto; /* Optional: Adds spacing around the figure */
+  display: flex; /* Use flexbox for centering */
+  flex-direction: column; /* Stack the image and caption vertically */
+  justify-content: center; /* Ensure everything is centered vertically */
+  align-items: center; /* Center the content horizontally */
+  margin: 20px auto; /* Center the container and add vertical spacing */
+  text-align: center; /* Center the caption text */
 }
 
 .image-caption img {
   max-width: 100%; /* Ensures the image is responsive */
   height: auto; /* Maintains the image's aspect ratio */
   border-radius: 5px; /* Optional: Adds rounded corners to the image */
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Adds a shadow for depth */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .image-caption figcaption {

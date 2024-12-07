@@ -40,10 +40,12 @@
 
     <section id="data">
       <h2>Data</h2>
-      <p>The dataset, obtained from Roboflow, contains labeled images of corals across the three health categories. It is divided into training and validation sets to assess model performance. The images are preprocessed using transformations to improve generalization and robustness. For training, transformations include resizing to 224 \times 224, random horizontal flipping, color jittering, and normalization using ImageNet mean and standard deviation. Validation data undergoes resizing and normalization to ensure consistency during evaluation.
-
-        The dataset exhibits class imbalance, with some coral health categories being underrepresented. To address this, augmentations such as brightness adjustments and random blurs were applied to the training data. A bar chart of class distribution visually confirmed the imbalance, emphasizing the need for these augmentations to ensure equitable learning across categories. The training set is further visualized to confirm the diversity and correctness of the data.</p>
-      <!-- Image -->
+      <p>The dataset, obtained from Roboflow, contains labeled images of corals across the three health categories. It is divided into training and validation sets to assess model performance. The images are preprocessed using transformations to improve generalization and robustness. For training, transformations include resizing to 224 \times 224, random horizontal flipping, color jittering, and normalization using ImageNet mean and standard deviation. Validation data undergoes resizing and normalization to ensure consistency during evaluation.</p>
+      <figure class="image-caption">
+        <img src="images/class-distribution.png" alt="Distribution of classes in the dataset">
+        <figcaption>Distribution of classes in the dataset</figcaption>
+      </figure>      
+      <p> The dataset exhibits class imbalance, with some coral health categories being underrepresented. To address this, augmentations such as brightness adjustments and random blurs were applied to the training data. A bar chart of class distribution visually confirmed the imbalance, emphasizing the need for these augmentations to ensure equitable learning across categories. The training set is further visualized to confirm the diversity and correctness of the data.</p>
       <figure class="image-caption">
         <img src="images/coral-dataset.png" alt="Visualization of coral dataset">
         <figcaption>Sample visualization of coral dataset.</figcaption>
@@ -74,7 +76,20 @@
 
     <section id="results">
       <h2>Results</h2>
-      <p>Figure X shows... [description of Figure X].</p>
+      <p>The initial performance of the model was evaluated to establish a baseline before implementing fine-tuning and hyperparameter optimization. This evaluation included an analysis of the confusion matrix, the training class distribution, and the training and validation loss curves over 10 epochs. These visualizations allowed me to assess the model’s ability to generalize and identify areas requiring improvement.</p>
+      <!-- Image -->
+      <figure class="image-caption">
+        <img src="images/confusion-matrix-1.png" alt="Confusion matrix at epoch 10">
+        <figcaption>Confusion matrix at epoch 10</figcaption>
+      </figure>
+      <p> The confusion matrix at epoch 10 showb provides detailed insights into the model’s classification performance across the three categories: Healthy, Damaged, and Bleached. The model performed well on the Damaged category, correctly classifying 28 samples with minimal errors. However, there were notable misclassifications in the Healthy and Bleached categories. Eight samples labeled as Healthy were misclassified as Bleached, and four Bleached samples were misclassified as either Healthy or Damaged. This pattern suggests the model struggled to distinguish between Healthy and Bleached corals, likely due to overlapping features in these categories or limitations in the dataset. Improving this aspect will be a key focus moving forward.
+      </p>
+      <figure class="image-caption">
+        <img src="images/training-validation-loss.png" alt="Training and validation loss curves">
+        <figcaption>Training and validation loss curves</figcaption>
+      </figure>
+      <p>The training and validation loss curves, depicted above, show the model’s learning progression over 10 epochs. The training loss decreased steadily throughout, indicating that the model was learning effectively from the training data. However, the validation loss initially dropped but began to plateau around epoch 4 and slightly increased toward epoch 9. This divergence between training and validation loss suggests the onset of overfitting, where the model performs well on the training set but struggles to generalize to unseen validation data. Addressing this issue will involve regularization techniques such as dropout or L2 regularization, as well as tuning the learning rate and other hyperparameters.
+      </p>
     </section>
 
     <section id="discussion">
